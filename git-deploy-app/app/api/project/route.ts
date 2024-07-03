@@ -1,20 +1,18 @@
 import { ECSClient, RunTaskCommand } from '@aws-sdk/client-ecs'
 import { generateSlug } from "random-word-slugs";
 
-
 export async function POST(
     req: Request,
 ) {
     try {
         const { gitURL, slug } = await req.json();
-
-        if (!gitURL || !slug)
+        if (!gitURL && !slug)
             return Response.json({ error: "Missing required fields" }, { status: 400 });
 
 
 
         const ecsClient = new ECSClient({
-            region: process.env.ECS_REGION || 'ap-south-1',
+            region: process.env.AWS_REGION || 'ap-south-1',
             credentials: {
                 accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
                 secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || ''
@@ -22,13 +20,13 @@ export async function POST(
         })
 
         const config = {
-            CLUSTER: process.env.ECR_CLUSTER_ARN || '',
-            TASK: process.env.ECR_TASK_ARN || ''
+            CLUSTER: process.env.ECS_CLUSTER_ARN || '',
+            TASK: process.env.ECS_TASK_ARN || ''
         }
 
         const projectSlug = slug ? slug : generateSlug()
 
-        // Spin the container
+
         const command = new RunTaskCommand({
             cluster: config.CLUSTER,
             taskDefinition: config.TASK,
@@ -37,21 +35,26 @@ export async function POST(
             networkConfiguration: {
                 awsvpcConfiguration: {
                     assignPublicIp: 'ENABLED',
-                    subnets: ['', '', ''],
-                    securityGroups: ['']
+                    subnets: [process.env.SUBNET_V1 as string, process.env.SUBNET_V2 as string, process.env.SUBNET_V3 as string],
+                    securityGroups: [process.env.SECURITY_GROUP as string]
                 }
             },
             overrides: {
                 containerOverrides: [
                     {
-                        name: 'builder-image',
+                        name: process.env.CONTAINER_IMAGE as string,
                         environment: [
                             { name: 'GIT_REPOSITORY__URL', value: gitURL },
-                            { name: 'PROJECT_ID', value: projectSlug }
+                            { name: 'PROJECT_ID', value: projectSlug },
+                            { name: 'AWS_REGION', value: process.env.AWS_REGION || 'ap-south-1' },
+                            { name: 'AWS_ACCESS_KEY_ID', value: process.env.AWS_ACCESS_KEY_ID || '' },
+                            { name: 'AWS_SECRET_ACCESS_KEY', value: process.env.AWS_SECRET_ACCESS_KEY || '' },
+                            { name: 'AWS_BUCKET_NAME', value: process.env.AWS_BUCKET_NAME || '' },
+                            { name: 'REDIS_HOST', value: process.env.REDIS_HOST || '' }
                         ]
                     }
                 ]
-            }
+            },
         })
 
         await ecsClient.send(command);

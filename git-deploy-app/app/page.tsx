@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Github } from "lucide-react";
 import { Fira_Code } from "next/font/google";
-import axios from "axios";
-import { useSocket } from "@/context/socket";
+// import { useSocket } from "@/context/socket";
+import { io } from "socket.io-client";
 
 // Importing the Fira Code font for code blocks
 const firaCode = Fira_Code({ subsets: ["latin"] });
@@ -23,7 +23,8 @@ export default function Home() {
   >();
 
   // Getting the socket instance from the context
-  const socket = useSocket();
+  // const socket = useSocket();
+  const socket = io();
 
   // Ref for the log container element
   const logContainerRef = useRef<HTMLElement>(null);
@@ -43,12 +44,19 @@ export default function Home() {
   const handleClickDeploy = useCallback(async () => {
     // Set loading state to true
     setLoading(true);
+    setCurrentStatus("Deployment in progress...");
 
-    // Make a POST request to the API to create a new project
-    const { data } = await axios.post(`/api/project`, {
-      gitURL: repoURL,
-      slug: projectId,
+    // Make a POST request to the /api/project
+    const response = await fetch("/api/project", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ gitURL: repoURL, slug: projectId }),
     });
+
+    // Parse the response JSON
+    const data = await response.json();
 
     // If the response is successful, update the project ID and deploy preview URL
     if (data && data.data) {
@@ -61,13 +69,27 @@ export default function Home() {
       if (socket) socket.emit("subscribe", `logs:${projectSlug}`);
     }
   }, [projectId, socket, repoURL]);
+  const logIds = useRef(new Set());
 
-  // Callback function to handle incoming socket messages
+  const [currentStatus, setCurrentStatus] = useState<string>("Deploy");
+
   const handleSocketIncomingMessage = useCallback((message: string) => {
-    console.log(`[Incoming Socket Message]:`, typeof message, message);
-    const { log } = JSON.parse(message);
-    // Update the logs state with the new log message
-    setLogs((prev) => [...prev, log]);
+    const { log, id } = JSON.parse(message);
+
+    // Check if the log already exists in the Set
+    if (!logIds.current.has(id)) {
+      logIds.current.add(id);
+      // Update the logs state with the new log message
+      setLogs((prev) => [...prev, log]);
+      if (log === "Process completed successfully") {
+        setCurrentStatus("Deployed");
+        setLoading(false);
+      } else if (log === "Failed to build project") {
+        setCurrentStatus("Failed to deploy");
+        setLoading(false);
+      }
+    }
+
     // Scroll to the bottom of the log container
     logContainerRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
@@ -76,7 +98,10 @@ export default function Home() {
   useEffect(() => {
     if (!socket) return;
     // Listen for incoming messages on the socket
-    socket.on("message", handleSocketIncomingMessage);
+    socket.on("message", (message: string) => {
+      console.log(`[Incoming Socket Message]:`, typeof message, message);
+      handleSocketIncomingMessage(message);
+    });
 
     // Clean up the event listener when the component unmounts
     return () => {
@@ -103,9 +128,10 @@ export default function Home() {
           disabled={!isValidURL[0] || loading}
           className="w-full mt-3"
         >
-          {loading ? "In Progress" : "Deploy"}
+          {currentStatus}
         </Button>
-        {deployPreviewURL && (
+
+        {currentStatus === "Deployed" && deployPreviewURL && (
           <div className="mt-2 bg-slate-900 py-4 px-2 rounded-lg">
             <p>
               Preview URL{" "}
