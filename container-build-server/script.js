@@ -34,12 +34,10 @@ async function buildProject() {
         const p = exec(buildCommand);
 
         p.stdout.on('data', (data) => {
-
             log(data.toString());
         });
 
         p.stderr.on('data', (data) => {
-
             log(data.toString());
         });
 
@@ -99,20 +97,12 @@ async function init() {
         await buildProject();
         await uploadToS3();
         log('Process completed successfully');
-        process.exit(0);
     } catch (error) {
         log(`Error: ${error.message}`);
-        process.exit(1);
-    }
-}
-
-async function init() {
-    try {
-        await buildProject();
-        await uploadToS3();
-        log('Process completed successfully');
-    } catch (error) {
-        log("Failed to build project")
+    } finally {
+        setTimeout(() => {
+            process.exit(0);
+        }, 5000);
     }
 }
 

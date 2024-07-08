@@ -84,7 +84,6 @@ web_modules/
 .parcel-cache
 
 # Next.js build output
-.next
 out
 
 # Nuxt.js build / generate output
@@ -129,8 +128,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-#http api-server
-api-server/
 
 #proxy server
 s3-reverse-proxy/

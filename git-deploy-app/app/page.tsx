@@ -47,7 +47,7 @@ export default function Home() {
     setCurrentStatus("Deployment in progress...");
 
     // Make a POST request to the /api/project
-    const response = await fetch("/api/project", {
+    const response = await fetch("/vercel-deployment-pipeline/api/project", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

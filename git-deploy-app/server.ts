@@ -1,14 +1,16 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { Redis } from 'ioredis';
 import { createServer } from "node:http";
 import next from "next";
 import { Server, Socket } from "socket.io";
-import dotenv from 'dotenv';
 
-dotenv.config();
+
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
-const port = 3000;
+const port = 3001;
 
 const checkENV = () => {
     const requiredEnvVars = {
