@@ -24,7 +24,7 @@ export default function Home() {
 
   // Getting the socket instance from the context
   // const socket = useSocket();
-  const socket = io("/", {
+  const socket = io({
     path: "/vercel-socket",
   });
 
