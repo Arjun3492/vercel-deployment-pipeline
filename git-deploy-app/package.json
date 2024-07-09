@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "ts-node server.ts",
+    "dev": "next dev -p 3003",
     "build": "next build",
-    "start": "ts-node server.ts",
+    "start": "next start -p 3003",
     "lint": "next lint"
   },
   "dependencies": {

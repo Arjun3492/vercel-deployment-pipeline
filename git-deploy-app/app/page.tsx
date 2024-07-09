@@ -24,9 +24,7 @@ export default function Home() {
 
   // Getting the socket instance from the context
   // const socket = useSocket();
-  const socket = io({
-    path: "/vercel-socket",
-  });
+  const socket = io();
 
   // Ref for the log container element
   const logContainerRef = useRef<HTMLElement>(null);
