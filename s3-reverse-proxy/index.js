@@ -12,12 +12,9 @@ app.use((req, res) => {
     const hostname = req.hostname;
     const subdomain = hostname.split('.')[0];
 
-    // Custom Domain - DB Query
-
     const resolvesTo = `${BASE_PATH}/${subdomain}`
 
     return proxy.web(req, res, { target: resolvesTo, changeOrigin: true })
-
 })
 
 proxy.on('proxyReq', (proxyReq, req, res) => {

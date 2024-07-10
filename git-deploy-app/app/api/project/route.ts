@@ -59,7 +59,9 @@ export async function POST(
 
         await ecsClient.send(command);
 
-        return Response.json({ status: 'queued', data: { projectSlug, url: `http://${projectSlug}.localhost:8000` } })
+        const domain = process.env.DOMAIN || 'localhost:8000'
+        const url = `http://${projectSlug}.${domain}`
+        return Response.json({ status: 'queued', data: { projectSlug, url } })
     }
     catch (e) {
         console.log("Error with /project endpoint", e);

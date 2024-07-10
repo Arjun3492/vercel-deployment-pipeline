@@ -6,6 +6,7 @@ import { Github } from "lucide-react";
 import { Fira_Code } from "next/font/google";
 // import { useSocket } from "@/context/socket";
 import { io } from "socket.io-client";
+import Navbar from "@/components/ui/navbar";
 
 // Importing the Fira Code font for code blocks
 const firaCode = Fira_Code({ subsets: ["latin"] });
@@ -111,55 +112,76 @@ export default function Home() {
 
   // Render the UI components
   return (
-    <main className="flex justify-center items-center h-[100vh]">
-      <div className="w-[600px]">
-        <span className="flex justify-start items-center gap-2">
-          <Github className="text-5xl" />
-          <Input
-            disabled={loading}
-            value={repoURL}
-            onChange={(e) => setURL(e.target.value)}
-            type="url"
-            placeholder="Github URL"
-          />
-        </span>
-        <Button
-          onClick={handleClickDeploy}
-          disabled={!isValidURL[0] || loading}
-          className="w-full mt-3"
-        >
-          {currentStatus}
-        </Button>
-
-        {currentStatus === "Deployed" && deployPreviewURL && (
-          <div className="mt-2 bg-slate-900 py-4 px-2 rounded-lg">
-            <p>
-              Preview URL{" "}
-              <a
-                target="_blank"
-                className="text-sky-400 bg-sky-950 px-3 py-2 rounded-lg"
-                href={deployPreviewURL}
-              >
-                {deployPreviewURL}
-              </a>
-            </p>
-          </div>
-        )}
-        {logs.length > 0 && (
-          <div
-            className={`${firaCode.className} text-sm text-green-500 logs-container mt-5 border-green-500 border-2 rounded-lg p-4 h-[300px] overflow-y-auto`}
+    <>
+      <Navbar />
+      <main className="flex justify-center items-center h-[90vh] px-10">
+        <div className="w-[600px]">
+          <span className="flex justify-start items-center gap-2">
+            <Github className="text-5xl" />
+            <Input
+              disabled={loading}
+              value={repoURL}
+              onChange={(e) => setURL(e.target.value)}
+              type="url"
+              placeholder="Github URL"
+            />
+          </span>
+          <Button
+            onClick={handleClickDeploy}
+            disabled={!isValidURL[0] || loading}
+            className="w-full mt-3"
           >
-            <pre className="flex flex-col gap-1">
-              {logs.map((log, i) => (
-                <code
-                  ref={logs.length - 1 === i ? logContainerRef : undefined}
-                  key={i}
-                >{`> ${log}`}</code>
-              ))}
-            </pre>
-          </div>
-        )}
-      </div>
-    </main>
+            {currentStatus}
+          </Button>
+
+          {repoURL === "" && process.env.NEXT_PUBLIC_SAMPLE_REPO && (
+            //create a interactive ui which ask user"To test the deployment pipeline, deploy this sample project" which when clicked will set the url to  the sample project url
+            <div className=" mt-3">
+              <p>
+                To test the deployment pipeline, use a sample Git repository if
+                you don&apos;t have one.{" "}
+              </p>
+              <Button
+                onClick={() => {
+                  setURL(process.env.NEXT_PUBLIC_SAMPLE_REPO as string);
+                }}
+                className="w-full mt-3"
+              >
+                Copy Sample Project
+              </Button>
+            </div>
+          )}
+
+          {currentStatus === "Deployed" && deployPreviewURL && (
+            <div className="mt-2 bg-slate-900 py-4 px-2 rounded-lg">
+              <p>
+                Preview URL{" "}
+                <a
+                  target="_blank"
+                  className="text-sky-400 bg-sky-950 px-3 py-2 rounded-lg"
+                  href={deployPreviewURL}
+                >
+                  {deployPreviewURL}
+                </a>
+              </p>
+            </div>
+          )}
+          {logs.length > 0 && (
+            <div
+              className={`${firaCode.className} text-sm text-green-500 logs-container mt-5 border-green-500 border-2 rounded-lg p-4 h-[300px] overflow-y-auto`}
+            >
+              <pre className="flex flex-col gap-1">
+                {logs.map((log, i) => (
+                  <code
+                    ref={logs.length - 1 === i ? logContainerRef : undefined}
+                    key={i}
+                  >{`> ${log}`}</code>
+                ))}
+              </pre>
+            </div>
+          )}
+        </div>
+      </main>
+    </>
   );
 }
