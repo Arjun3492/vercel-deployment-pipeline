@@ -128,6 +128,3 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-
-#proxy server
-s3-reverse-proxy/
