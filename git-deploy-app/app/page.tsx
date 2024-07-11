@@ -137,17 +137,14 @@ export default function Home() {
           {repoURL === "" && process.env.NEXT_PUBLIC_SAMPLE_REPO && (
             //create a interactive ui which ask user"To test the deployment pipeline, deploy this sample project" which when clicked will set the url to  the sample project url
             <div className=" mt-3">
-              <p>
-                To test the deployment pipeline, use a sample Git repository if
-                you don&apos;t have one.{" "}
-              </p>
+              <p> </p>
               <Button
                 onClick={() => {
                   setURL(process.env.NEXT_PUBLIC_SAMPLE_REPO as string);
                 }}
                 className="w-full mt-3"
               >
-                Copy Sample Project
+                If you don&apos;t have a git repo click here to use mine{" "}
               </Button>
             </div>
           )}
